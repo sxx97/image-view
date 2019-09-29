@@ -3,6 +3,8 @@ package uploadImg
 import (
 	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"main/mongoose"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +14,12 @@ import (
 var (
 	ossBucket *oss.Bucket
 )
+
+type Image struct {
+	ID  bsontype.Type "_id,omitempty"               // 简写bson映射口
+	Alt string `bson:"dbalt",json:"jsonalt"` // bson和json映射
+	Src string // 属性名 为全小写的key
+}
 
 func init() {
 	fmt.Println("OSS Go SDK Version: ", oss.Version)
@@ -51,7 +59,10 @@ func UploadImg(localFileName string) {
 		handleError(err)
 	} else {
 		visitImgUrl := visitHost + objectName
-
+		mongoose.InsertDatabase(Image{
+			Alt: "",
+			Src: visitImgUrl,
+		})
 	}
 }
 

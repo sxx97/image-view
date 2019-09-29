@@ -6,42 +6,37 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
-	//"time"
+	"time"
 )
 
-type Image struct {
-	ID  string "_id,omitempty"               // 简写bson映射口
-	Alt string `bson:"dbalt",json:"jsonalt"` // bson和json映射
-	Src string // 属性名 为全小写的key
-}
-
-var databaseUrl string = "mongodb://root:12138@localhost:21000"
+var (
+	databaseCollection *mongo.Collection
+	databaseUrl string = "mongodb://root:12138@localhost:21000"
+)
 
 func init() {
-	/*client, err := mongo.NewClient(options.Client().ApplyURI(databaseUrl))
+	client, err := mongo.NewClient(options.Client().ApplyURI(databaseUrl))
 	if err != nil {
-		println("错误", err)
-	} else {
-		println("连接结果", client)
+		fmt.Println("创建mongodb错误: ", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20 * time.Second)
 	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {
-		println("错误信息2:", err)
+		println("连接数据库错误: ", err)
 	}
+
 	collection := client.Database("test").Collection("trainers")
-	imgExample := Image{
-		ID:"adada",
-		Alt: "alt内容",
-		Src: "图片路径",
-	}
-	insertResult, err := collection.InsertOne(context.TODO(), imgExample)
+	databaseCollection = collection
+}
+
+func InsertDatabase(data interface{}) {
+	insertResult, err := databaseCollection.InsertOne(context.TODO(), data)
 	if err != nil {
 		println("插入失败", err)
 	} else {
 		fmt.Println("插入成功: ", insertResult.InsertedID)
-	}*/
+	}
 }
 
 func ConnectTestDatabase() {
