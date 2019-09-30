@@ -1,6 +1,7 @@
 package uploadImg
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
@@ -46,10 +47,21 @@ func handleError(err error) {
 	os.Exit(-1)
 }
 
+type imgResultData struct {
+	Status string `json:"status"`
+	Message string `json:"msg"`
+	Data Image `json:"data"`
+}
+
 /**
 * 上传文件
  */
-func UploadImg(localFileName string) {
+func UploadImg(localFileName string) imgResultData {
+	var (
+		insertCode interface{}
+		visitImgUrl string
+		resultData imgResultData
+	)
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
 	filePathArr := strings.Split(localFileName, "/")
 	objectName := filePathArr[len(filePathArr)-1] + strconv.FormatInt(time.Now().Unix(), 10)
@@ -58,12 +70,36 @@ func UploadImg(localFileName string) {
 	if err != nil {
 		handleError(err)
 	} else {
-		visitImgUrl := visitHost + objectName
-		mongoose.InsertDatabase(Image{
+		visitImgUrl = visitHost + objectName
+	 	insertCode = mongoose.InsertDatabase(Image{
 			Alt: "",
 			Src: visitImgUrl,
 		})
 	}
+	if insertCode == 1 {
+		resultData = imgResultData{
+			Status: "success",
+			Message: "上传成功",
+			Data: Image{
+				Src: visitImgUrl,
+			},
+		}
+	} else {
+		resultData = imgResultData{
+			Status: "error",
+			Message: "上传失败",
+			Data: Image{},
+		}
+	}
+
+	b, err := json.Marshal(resultData)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+
+	fmt.Println(b, "上传结果信息")
+	os.Stdout.Write(b)
+	return resultData
 }
 
 /**

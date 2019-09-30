@@ -30,12 +30,14 @@ func init() {
 	databaseCollection = collection
 }
 
-func InsertDatabase(data interface{}) {
+func InsertDatabase(data interface{}) int64 {
 	insertResult, err := databaseCollection.InsertOne(context.TODO(), data)
 	if err != nil {
 		println("插入失败", err)
+		return 0
 	} else {
 		fmt.Println("插入成功: ", insertResult.InsertedID)
+		return 1
 	}
 }
 
