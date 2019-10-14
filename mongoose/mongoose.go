@@ -11,7 +11,7 @@ import (
 
 var (
 	databaseCollection *mongo.Collection
-	databaseUrl string = "mongodb://root:12138@localhost:21000"
+	databaseUrl        string = "mongodb://root:12138@localhost:21000"
 )
 
 func init() {
@@ -19,7 +19,7 @@ func init() {
 	if err != nil {
 		fmt.Println("创建mongodb错误: ", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 20 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {

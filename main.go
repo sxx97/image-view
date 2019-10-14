@@ -1,11 +1,22 @@
 package main
 
 import (
-	"main/uploadImg"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/middleware/logger"
 )
 
 //import "main/mongoose"
 
 func main() {
-	uploadImg.UploadImg("E:/前端UI/tinified/feature4.png")
+	startServe()
+}
+
+func startServe() {
+	app := iris.New()
+	//app.Use(recover2.New())
+	app.Use(logger.New())
+	app.Handle("GET", "/", func(ctx iris.Context) {
+		ctx.HTML("<h1>开发中...</h1>")
+	})
+	app.Run(iris.Addr(":80"))
 }
