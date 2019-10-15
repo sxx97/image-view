@@ -18,5 +18,6 @@ func startServe() {
 	app.Handle("GET", "/", func(ctx iris.Context) {
 		ctx.HTML("<h1>开发中...</h1>")
 	})
-	app.Run(iris.TLS("172.16.47.62:443", "mycreat.pem", "mykey.key"))
+	//iris.TLS("172.16.47.62:80", "mycreat.pem", "mykey.key")
+	app.Run(iris.Addr("172.16.47.62:80"))
 }
