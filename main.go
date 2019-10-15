@@ -11,12 +11,17 @@ func main() {
 	startServe()
 }
 
+
 func startServe() {
 	app := iris.New()
+
 	//app.Use(recover2.New())
 	app.Use(logger.New())
 	app.Handle("GET", "/", func(ctx iris.Context) {
 		ctx.HTML("<h1>开发中...</h1>")
+	})
+	app.Handle("GET", "/root.txt", func(ctx iris.Context) {
+		ctx.ServeFile("./root.txt", false)
 	})
 	//
 	app.Get("/test", testRoute);
