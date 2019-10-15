@@ -1,0 +1,8 @@
+DisablePathCorrection = false
+EnablePathEscape = false
+FireMethodNotAllowed = true
+DisableBodyConsumptionOnUnmarshal = false
+
+Charset = "UTF-8"
+[Other]
+    MyServerName = "iris"
