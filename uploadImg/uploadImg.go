@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"io"
 	"main/mongoose"
 	"os"
 	"strconv"
@@ -100,6 +101,21 @@ func UploadImg(localFileName string) imgResultData {
 	fmt.Println(b, "上传结果信息")
 	os.Stdout.Write(b)
 	return resultData
+}
+
+
+func UploadFileStream(fd io.Reader, fileName string){
+	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
+	visitImgUrl := visitHost + fileName
+	mongoose.InsertDatabase(Image{
+		Alt: "",
+		Src: visitImgUrl,
+	})
+	err := ossBucket.PutObject(fileName, fd)
+	if err != nil {
+		fmt.Println("Error:", err)
+		//os.Exit(-1)
+	}
 }
 
 /**
