@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"io"
 	"main/mongoose"
 	"os"
@@ -19,7 +21,7 @@ var (
 
 type Image struct {
 	ID  bsontype.Type "_id,omitempty"               // 简写bson映射口
-	Alt string `bson:"dbalt",json:"jsonalt"` // bson和json映射
+	Alt string `bson:"alt",json:"alt"` // bson和json映射
 	Src string // 属性名 为全小写的key
 }
 
@@ -48,7 +50,7 @@ func handleError(err error) {
 	os.Exit(-1)
 }
 
-type imgResultData struct {
+type ImgResultData struct {
 	Status string `json:"status"`
 	Message string `json:"msg"`
 	Data Image `json:"data"`
@@ -57,12 +59,13 @@ type imgResultData struct {
 /**
 * 上传文件
  */
-func UploadImg(localFileName string) imgResultData {
+func UploadImg(localFileName string) ImgResultData {
 	var (
 		insertCode interface{}
 		visitImgUrl string
-		resultData imgResultData
+		resultData ImgResultData
 	)
+	imgCollections := mongoose.NewMgo("test", "trainers")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
 	filePathArr := strings.Split(localFileName, "/")
 	objectName := filePathArr[len(filePathArr)-1] + strconv.FormatInt(time.Now().Unix(), 10)
@@ -72,13 +75,13 @@ func UploadImg(localFileName string) imgResultData {
 		handleError(err)
 	} else {
 		visitImgUrl = visitHost + objectName
-	 	insertCode = mongoose.InsertDatabase(Image{
+	 	insertCode = imgCollections.InsertDatabase(Image{
 			Alt: "",
 			Src: visitImgUrl,
 		})
 	}
 	if insertCode == 1 {
-		resultData = imgResultData{
+		resultData = ImgResultData{
 			Status: "success",
 			Message: "上传成功",
 			Data: Image{
@@ -86,7 +89,7 @@ func UploadImg(localFileName string) imgResultData {
 			},
 		}
 	} else {
-		resultData = imgResultData{
+		resultData = ImgResultData{
 			Status: "error",
 			Message: "上传失败",
 			Data: Image{},
@@ -103,12 +106,16 @@ func UploadImg(localFileName string) imgResultData {
 	return resultData
 }
 
-
-func UploadFileStream(fd io.Reader, fileName string){
+//	上传文件(流形式)
+//	fd 文件流
+//	fileName 文件名称
+//  alt 图片介绍
+func UploadFileStream(fd io.Reader, fileName string, alt ...string){
+	imgCollections := mongoose.NewMgo("test", "trainers")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
 	visitImgUrl := visitHost + fileName
-	mongoose.InsertDatabase(Image{
-		Alt: "",
+	imgCollections.InsertDatabase(Image{
+		Alt: alt[0],
 		Src: visitImgUrl,
 	})
 	err := ossBucket.PutObject(fileName, fd)
@@ -118,8 +125,18 @@ func UploadFileStream(fd io.Reader, fileName string){
 	}
 }
 
+// 查询图片列表(数据库)
+func FindImgForDatabase(startIndex, pageSize int64) {
+	fmt.Println("获取数据的分页参数:", startIndex, pageSize)
+	imgCollections := mongoose.NewMgo("test", "trainers")
+	result := imgCollections.FindDatabase(bson.D{}, options.Find().SetSort(bson.D{{"_id", 1}}).SetSkip(startIndex * pageSize).SetLimit(pageSize))
+	for _, item := range result {
+		fmt.Println("图片列表:", item)
+	}
+}
+
 /**
-* 获取同一空间下的图片列表
+* 获取同一空间下的图片列表(阿里oss)
  */
 func GetImgList() {
 	marker := ""

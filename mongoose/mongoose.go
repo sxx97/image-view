@@ -3,19 +3,32 @@ package mongoose
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"time"
 )
 
+type mgo struct {
+	database string
+	collection string
+}
+
 var (
-	databaseCollection *mongo.Collection
-	databaseUrl        string = "mongodb://root:12138@localhost:21000"
+	client *mongo.Client
+	databaseUrl        string = "mongodb://root:12138@http://116.62.213.108:21000"
 )
 
+func NewMgo(database, collection string) *mgo {
+	return &mgo{
+		database,
+		collection,
+	}
+}
+
 func init() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(databaseUrl))
+	var err error
+	client, err = mongo.NewClient(options.Client().ApplyURI(databaseUrl))
 	if err != nil {
 		fmt.Println("创建mongodb错误: ", err)
 	}
@@ -26,12 +39,11 @@ func init() {
 		println("连接数据库错误: ", err)
 	}
 
-	collection := client.Database("test").Collection("trainers")
-	databaseCollection = collection
 }
 
-func InsertDatabase(data interface{}) int64 {
-	insertResult, err := databaseCollection.InsertOne(context.TODO(), data)
+func (m *mgo) InsertDatabase(data interface{}) int64 {
+	collection := client.Database(m.database).Collection(m.collection)
+	insertResult, err := collection.InsertOne(context.TODO(), data)
 	if err != nil {
 		println("插入失败", err)
 		return 0
@@ -41,16 +53,11 @@ func InsertDatabase(data interface{}) int64 {
 	}
 }
 
-func ConnectTestDatabase() {
-	clientOptions := options.Client().ApplyURI(databaseUrl)
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	fmt.Println("Connected to MongoDB!")
+func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tempArr []*mongo.Cursor) {
+	collection := client.Database(m.database).Collection(m.collection)
+	temp, _ := collection.Find(context.Background(), filter, findOptions)
+	tempArr = append(tempArr, temp)
+	temp.Next(context.Background())
+	return
 }
