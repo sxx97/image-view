@@ -16,7 +16,7 @@ type mgo struct {
 
 var (
 	client *mongo.Client
-	databaseUrl        string = "mongodb://root:12138@http://116.62.213.108:21000"
+	databaseUrl string = "mongodb://root:12138@116.62.213.108:21000"
 )
 
 func NewMgo(database, collection string) *mgo {
@@ -54,10 +54,13 @@ func (m *mgo) InsertDatabase(data interface{}) int64 {
 }
 
 
-func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tempArr []*mongo.Cursor) {
+func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tempArr []bson.M) {
 	collection := client.Database(m.database).Collection(m.collection)
-	temp, _ := collection.Find(context.Background(), filter, findOptions)
-	tempArr = append(tempArr, temp)
-	temp.Next(context.Background())
+	cur, _ := collection.Find(context.Background(), filter, findOptions)
+	for cur.Next(context.Background()) {
+		var tempData bson.M
+		cur.Decode(&tempData)
+		tempArr = append(tempArr, tempData)
+	}
 	return
 }
