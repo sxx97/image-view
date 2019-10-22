@@ -17,7 +17,7 @@ func main() {
 }
 
 func startServe() {
-	var startIndex int64 = 0
+	var pageIndex int64 = 0
 	app := iris.New()
 	app.Logger().SetLevel("debug")
 	app.Use(recover2.New())
@@ -28,8 +28,8 @@ func startServe() {
 		h := md5.New()
 		io.WriteString(h, strconv.FormatInt(now, 10))
 		token := fmt.Sprintf("%x", h.Sum(nil))
-		uploadImg.FindImgForDatabase(startIndex, 3)
-		startIndex++
+		uploadImg.FindImgForDatabase(pageIndex, 3)
+		pageIndex++
 		ctx.View("index.html", token)
 	})
 	app.Handle("GET", "/root.txt", func(ctx iris.Context) {
