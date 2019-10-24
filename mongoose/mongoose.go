@@ -15,8 +15,13 @@ type mgo struct {
 }
 
 var (
+	account string
+	password string
+)
+
+var (
 	client *mongo.Client
-	databaseUrl string = "mongodb://root:12138@116.62.213.108:21000"
+	databaseUrl string
 )
 
 func NewMgo(database, collection string) *mgo {
@@ -27,6 +32,11 @@ func NewMgo(database, collection string) *mgo {
 }
 
 func init() {
+	fmt.Println("请输入数据库账号:")
+	fmt.Scanln(&account)
+	fmt.Println("请输入数据库密码:")
+	fmt.Scanln(&password)
+	databaseUrl = "mongodb://"+account+":"+password+"@116.62.213.108:21000"
 	var err error
 	client, err = mongo.NewClient(options.Client().ApplyURI(databaseUrl))
 	if err != nil {
