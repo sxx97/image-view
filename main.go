@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	recover2 "github.com/kataras/iris/middleware/recover"
+	api2 "main/api"
 )
 
 var app *iris.Application
@@ -36,8 +37,8 @@ func indexHtml() {
 
 func apiParty() {
 	api := app.Party("/api")
-	api.Handle("GET", "/img", apiGetImgList)
-	api.Post("/upload/img", apiUploadImg)
+	api.Handle("GET", "/img", api2.ApiGetImgList)
+	api.Post("/upload/img", api2.ApiUploadImg)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/

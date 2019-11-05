@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"github.com/kataras/iris"
@@ -7,7 +7,7 @@ import (
 )
 
 // 获取图片列表
-func apiGetImgList(ctx iris.Context) {
+func ApiGetImgList(ctx iris.Context) {
 	ctx.ContentType("application/json")
 	pageIndex, _ := strconv.ParseInt(ctx.FormValue("page_index"), 10, 64)
 	pageSize, _ := strconv.ParseInt(ctx.FormValue("page_size"), 10, 64)
@@ -28,7 +28,7 @@ func apiGetImgList(ctx iris.Context) {
 }
 
 // 上传图片接口
-func apiUploadImg(ctx iris.Context) {
+func ApiUploadImg(ctx iris.Context) {
 	file, handler, _ := ctx.FormFile("uploadfile")
 	defer file.Close()
 	uploadImg.UploadFileStream(file, handler.Filename, ctx.PostValue("alt"))
