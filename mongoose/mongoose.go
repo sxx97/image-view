@@ -32,10 +32,13 @@ func NewMgo(database, collection string) *mgo {
 }
 
 func init() {
-	fmt.Println("请输入数据库账号:")
+	/*fmt.Println("请输入数据库账号:")
 	fmt.Scanln(&account)
 	fmt.Println("请输入数据库密码:")
-	fmt.Scanln(&password)
+	fmt.Scanln(&password)*/
+	//TODO: 临时使用,提交时删除
+	account = "root";
+	password = "12138";
 	databaseUrl = "mongodb://"+account+":"+password+"@116.62.213.108:21000"
 	var err error
 	client, err = mongo.NewClient(options.Client().ApplyURI(databaseUrl))
@@ -66,7 +69,11 @@ func (m *mgo) InsertDatabase(data interface{}) int64 {
 
 func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tempArr []bson.M) {
 	collection := client.Database(m.database).Collection(m.collection)
-	cur, _ := collection.Find(context.Background(), filter, findOptions)
+	cur, err := collection.Find(context.Background(), filter, findOptions)
+	if err != nil {
+		fmt.Println("查询数据库的错误信息", err)
+		return
+	}
 	for cur.Next(context.Background()) {
 		var tempData bson.M
 		cur.Decode(&tempData)

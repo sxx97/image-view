@@ -17,7 +17,6 @@ require (
 	github.com/flosch/pongo2 v0.0.0-20190707114632-bbf5a6c351f4 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gocolly/colly v1.2.0
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/schema v1.1.0
 	github.com/gorilla/securecookie v1.1.1
