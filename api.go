@@ -27,6 +27,7 @@ func apiGetImgList(ctx iris.Context) {
 	}
 }
 
+// 上传图片接口
 func apiUploadImg(ctx iris.Context) {
 	file, handler, _ := ctx.FormFile("uploadfile")
 	defer file.Close()

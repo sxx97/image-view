@@ -7,8 +7,10 @@ import (
 )
 
 var app *iris.Application
+
 func main() {
 	initServe()
+	indexHtml()
 	apiParty()
 	app.Run(iris.TLS(":443", "mycreat.pem", "mykey.key"), iris.WithConfiguration(iris.TOML("./config/main.tml")))
 }
@@ -20,11 +22,22 @@ func initServe() {
 	app.Use(logger.New())
 }
 
+func indexHtml() {
+	app.RegisterView(iris.HTML("./webapp", ".html"))
+	app.Get("/", func(ctx iris.Context) {
+		ctx.View("index.html")
+	})
+	app.Get("/:page", func(ctx iris.Context) {
+		if (ctx.Path() != "/api") {
+			ctx.View("index.html")
+		}
+	})
+}
 
 func apiParty() {
 	api := app.Party("/api")
 	api.Handle("GET", "/img", apiGetImgList)
-	api.Post("/upload", apiUploadImg)
+	api.Post("/upload/img", apiUploadImg)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/
