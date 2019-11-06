@@ -65,7 +65,7 @@ func UploadImg(localFileName string) ImgResultData {
 		visitImgUrl string
 		resultData ImgResultData
 	)
-	imgCollections := mongoose.NewMgo("test", "trainers")
+	imgCollections := mongoose.NewMgo("tongpao", "imgs")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
 	filePathArr := strings.Split(localFileName, "/")
 	objectName := filePathArr[len(filePathArr)-1] + strconv.FormatInt(time.Now().Unix(), 10)
@@ -112,7 +112,7 @@ func UploadImg(localFileName string) ImgResultData {
 //  alt 图片介绍
 // 用于客户端上传
 func UploadFileStream(fd io.Reader, fileName string, alt ...string){
-	imgCollections := mongoose.NewMgo("test", "trainers")
+	imgCollections := mongoose.NewMgo("tongpao", "imgs")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
 	visitImgUrl := visitHost + fileName
 	imgCollections.InsertDatabase(Image{
@@ -129,13 +129,17 @@ func UploadFileStream(fd io.Reader, fileName string, alt ...string){
 // 查询图片列表(数据库)
 // pageIndex 分页页数
 // pageSize 分页数量
-func FindImgForDatabase(pageIndex, pageSize int64) {
+func FindImgForDatabase(pageIndex, pageSize int64) (imgList []map[string]interface{}) {
+	if pageSize == 0 {
+		pageSize = 10
+	}
 	fmt.Println("获取数据的分页参数:", pageIndex, pageSize)
-	imgCollections := mongoose.NewMgo("test", "trainers")
+	imgCollections := mongoose.NewMgo("tongpao", "imgs")
 	result := imgCollections.FindDatabase(bson.D{}, options.Find().SetSort(bson.D{{"_id", 1}}).SetSkip(pageIndex * pageSize).SetLimit(pageSize))
 	for _, item := range result {
-		fmt.Println("图片列表:", item)
+		imgList = append(imgList, item)
 	}
+	return
 }
 
 /**
