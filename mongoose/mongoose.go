@@ -54,16 +54,15 @@ func init() {
 
 }
 
-func (m *mgo) InsertDatabase(data interface{}) int64 {
+func (m *mgo) InsertDatabase(data interface{}) *mongo.InsertOneResult {
 	collection := client.Database(m.database).Collection(m.collection)
 	insertResult, err := collection.InsertOne(context.TODO(), data)
 	if err != nil {
 		println("插入失败", err)
-		return 0
 	} else {
 		fmt.Println("插入成功: ", insertResult.InsertedID)
-		return 1
 	}
+	return insertResult
 }
 
 func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tempArr []bson.M) {

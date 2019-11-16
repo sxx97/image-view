@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/kataras/iris"
 	"main/uploadImg"
 	"strconv"
@@ -31,5 +32,8 @@ func ApiGetImgList(ctx iris.Context) {
 func ApiUploadImg(ctx iris.Context) {
 	file, handler, _ := ctx.FormFile("uploadfile")
 	defer file.Close()
-	uploadImg.UploadFileStream(file, handler.Filename, ctx.PostValue("alt"))
+	fmt.Println(ctx.FormValues())
+	return
+	uploadRes := uploadImg.UploadFileStream(file, handler.Filename, ctx.PostValue("alt"))
+	ctx.JSON(uploadRes)
 }
