@@ -25,7 +25,7 @@ func initServe() {
 
 	app.WrapRouter(func(w http.ResponseWriter, r *http.Request, router http.HandlerFunc) {
 		path := r.URL.Path
-
+		app.Logger().Print("请求连接:", path)
 		if !strings.Contains(path, ".") {
 			router(w, r)
 			return
