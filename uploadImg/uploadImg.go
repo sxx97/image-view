@@ -20,9 +20,9 @@ var (
 )
 
 type Image struct {
-	ID  bsontype.Type "_id,omitempty"               // 简写bson映射口
-	Alt string `bson:"alt",json:"alt"` // bson和json映射
-	Src string // 属性名 为全小写的key
+	ID  bsontype.Type "_id,omitempty"         // 简写bson映射口
+	Alt string        `bson:"alt",json:"alt"` // bson和json映射
+	Src string        // 属性名 为全小写的key
 }
 
 func init() {
@@ -51,9 +51,9 @@ func handleError(err error) {
 }
 
 type ImgResultData struct {
-	Status string `json:"status"`
+	Status  string `json:"status"`
 	Message string `json:"msg"`
-	Data Image `json:"data"`
+	Data    Image  `json:"data"`
 }
 
 // 上传文件(文件名称)
@@ -61,9 +61,9 @@ type ImgResultData struct {
 // 用于服务器上传
 func UploadImg(localFileName string) ImgResultData {
 	var (
-		insertCode interface{}
+		insertCode  interface{}
 		visitImgUrl string
-		resultData ImgResultData
+		resultData  ImgResultData
 	)
 	imgCollections := mongoose.NewMgo("tongpao", "imgs")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
@@ -75,14 +75,14 @@ func UploadImg(localFileName string) ImgResultData {
 		handleError(err)
 	} else {
 		visitImgUrl = visitHost + objectName
-	 	insertCode = imgCollections.InsertDatabase(Image{
+		insertCode = imgCollections.InsertDatabase(Image{
 			Alt: "",
 			Src: visitImgUrl,
 		})
 	}
 	if insertCode == 1 {
 		resultData = ImgResultData{
-			Status: "success",
+			Status:  "success",
 			Message: "上传成功",
 			Data: Image{
 				Src: visitImgUrl,
@@ -90,9 +90,9 @@ func UploadImg(localFileName string) ImgResultData {
 		}
 	} else {
 		resultData = ImgResultData{
-			Status: "error",
+			Status:  "error",
 			Message: "上传失败",
-			Data: Image{},
+			Data:    Image{},
 		}
 	}
 
@@ -111,7 +111,7 @@ func UploadImg(localFileName string) ImgResultData {
 //	fileName 文件名称
 //  alt 图片介绍
 // 用于客户端上传
-func UploadFileStream(fd io.Reader, fileName string, alt ...string){
+func UploadFileStream(fd io.Reader, fileName string, alt ...string) {
 	imgCollections := mongoose.NewMgo("tongpao", "imgs")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
 	visitImgUrl := visitHost + fileName
@@ -135,7 +135,7 @@ func FindImgForDatabase(pageIndex, pageSize int64) (imgList []map[string]interfa
 	}
 	fmt.Println("获取数据的分页参数:", pageIndex, pageSize)
 	imgCollections := mongoose.NewMgo("tongpao", "imgs")
-	result := imgCollections.FindDatabase(bson.D{}, options.Find().SetSort(bson.D{{"_id", 1}}).SetSkip(pageIndex * pageSize).SetLimit(pageSize))
+	result := imgCollections.FindDatabase(bson.D{}, options.Find().SetSort(bson.D{{"_id", 1}}).SetSkip(pageIndex*pageSize).SetLimit(pageSize))
 	for _, item := range result {
 		imgList = append(imgList, item)
 	}

@@ -10,17 +10,17 @@ import (
 )
 
 type mgo struct {
-	database string
+	database   string
 	collection string
 }
 
 var (
-	account string
+	account  string
 	password string
 )
 
 var (
-	client *mongo.Client
+	client      *mongo.Client
 	databaseUrl string
 )
 
@@ -37,9 +37,9 @@ func init() {
 	fmt.Println("请输入数据库密码:")
 	fmt.Scanln(&password)*/
 	//TODO: 临时使用,提交时删除
-	account = "root";
-	password = "12138";
-	databaseUrl = "mongodb://"+account+":"+password+"@116.62.213.108:21000"
+	account = "root"
+	password = "12138"
+	databaseUrl = "mongodb://" + account + ":" + password + "@116.62.213.108:21000"
 	var err error
 	client, err = mongo.NewClient(options.Client().ApplyURI(databaseUrl))
 	if err != nil {
@@ -65,7 +65,6 @@ func (m *mgo) InsertDatabase(data interface{}) int64 {
 		return 1
 	}
 }
-
 
 func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tempArr []bson.M) {
 	collection := client.Database(m.database).Collection(m.collection)

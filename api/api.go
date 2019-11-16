@@ -15,14 +15,14 @@ func ApiGetImgList(ctx iris.Context) {
 	if len(imgList) > 0 {
 		ctx.JSON(map[string]interface{}{
 			"status": "success",
-			"data": imgList,
-			"msg": "",
+			"data":   imgList,
+			"msg":    "",
 		})
 	} else {
 		ctx.JSON(map[string]interface{}{
 			"status": "error",
-			"data": nil,
-			"msg": "数据为空",
+			"data":   nil,
+			"msg":    "数据为空",
 		})
 	}
 }
