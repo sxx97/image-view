@@ -18,10 +18,10 @@ var (
 )
 
 type Image struct {
-	ID  interface{} "_id,omitempty"         // 简写bson映射口
-	Alt string        `bson:"alt",json:"alt"` // bson和json映射
-	Src string        // 属性名 为全小写的key
-	FullSrc string
+	ID  interface{} `json:"id",bson:"id",_id,omitempty`         // 简写bson映射口
+	Alt string        `json:"alt",bson:"alt"` // bson和json映射
+	Src string        `json:"src",bson:"src"`// 属性名 为全小写的key
+	FullSrc string  `json:"fullSrc",bson:"fullSrc"`
 }
 
 func init() {
@@ -52,7 +52,7 @@ func handleError(err error) {
 type ImgResultData struct {
 	Status  string `json:"status"`
 	Message string `json:"msg"`
-	Data    Image  `json:"data"`
+	Data    interface{}  `json:"data"`
 }
 
 // 上传文件(文件名称)
@@ -116,12 +116,12 @@ func UploadFileStream(fd io.Reader, fileName string, alt ...string) ImgResultDat
 
 	err := ossBucket.PutObject(fileName, fd)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("流文件上传结果:", err)
 		return resultData
 	}
 
-	imgCollections := mongoose.NewMgo("tongpao", "imgs")
-	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
+	imgCollections := mongoose.NewMgo("test", "testImgs")
+	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com/"
 	visitImgUrl = visitHost + fileName
 	insertResult := imgCollections.InsertDatabase(Image{
 		Alt: alt[0],
