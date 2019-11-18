@@ -120,7 +120,7 @@ func UploadFileStream(fd io.Reader, fileName string, alt ...string) ImgResultDat
 		return resultData
 	}
 
-	imgCollections := mongoose.NewMgo("test", "testImgs")
+	imgCollections := mongoose.NewMgo("tongpao", "imgs")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com/"
 	visitImgUrl = visitHost + fileName
 	insertResult := imgCollections.InsertDatabase(Image{
