@@ -8,9 +8,7 @@ import (
 	"io"
 	"main/mongoose"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 )
 
 var (
@@ -58,43 +56,34 @@ type ImgResultData struct {
 // 上传文件(文件名称)
 // localFileName 本地文件名称
 // 用于服务器上传
-func UploadImg(localFileName string) ImgResultData {
+func UploadImg(localFileName string) (resultData Image) {
 	var (
-		insertCode  interface{}
 		visitImgUrl string
-		resultData  ImgResultData
 	)
-	resultData = ImgResultData{
-		Status:  "error",
-		Message: "上传失败",
-		Data:    Image{},
-	}
 
 	imgCollections := mongoose.NewMgo("test", "testImgs")
-	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com"
+	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com/"
 	filePathArr := strings.Split(localFileName, "/")
-	objectName := filePathArr[len(filePathArr)-1] + strconv.FormatInt(time.Now().Unix(), 10)
+	objectName := filePathArr[len(filePathArr)-1]
 	fmt.Println("存储对象名称: ", objectName)
 	err := ossBucket.PutObjectFromFile(objectName, localFileName)
 	if err != nil {
 		handleError(err)
-	} else {
-		visitImgUrl = visitHost + objectName
-		insertCode = imgCollections.InsertDatabase(Image{
-			Alt: "",
-			Src: visitImgUrl,
-		})
+		return
 	}
-	if insertCode != nil {
-		resultData = ImgResultData{
-			Status:  "success",
-			Message: "上传成功",
-			Data: Image{
-				Src: visitImgUrl,
-			},
+	visitImgUrl = visitHost + objectName
+	insertResult := imgCollections.InsertDatabase(Image{
+		Alt: "",
+		FullSrc: visitImgUrl,
+		Src: objectName,
+	})
+	if insertResult != nil {
+		resultData = Image{
+			ID: insertResult.InsertedID,
+			Src: visitImgUrl,
 		}
 	}
-	return resultData
+	return
 }
 
 //	上传文件(流形式)
@@ -120,7 +109,7 @@ func UploadFileStream(fd io.Reader, fileName string, alt ...string) ImgResultDat
 		return resultData
 	}
 
-	imgCollections := mongoose.NewMgo("tongpao", "imgs")
+	imgCollections := mongoose.NewMgo("test", "testImgs")
 	visitHost := "https://tongpaotk.oss-cn-beijing.aliyuncs.com/"
 	visitImgUrl = visitHost + fileName
 	insertResult := imgCollections.InsertDatabase(Image{

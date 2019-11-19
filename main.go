@@ -52,12 +52,14 @@ func indexHtml() {
 			ctx.View("index.html")
 		}
 	})
+
 }
 
 func apiParty() {
 	api := app.Party("/api")
 	api.Handle("GET", "/img", api2.ApiGetImgList)
 	api.Post("/upload/img", api2.ApiUploadImg)
+	api.Post("/upload/multiImg", api2.ApiUploadMultiImg)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/
