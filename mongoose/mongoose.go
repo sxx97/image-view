@@ -79,3 +79,9 @@ func (m *mgo) FindDatabase(filter bson.D, findOptions *options.FindOptions) (tem
 	}
 	return
 }
+
+func (m *mgo) FindDatabaseTotal() int {
+	collection := client.Database(m.database).Collection(m.collection)
+	total, _ := collection.CountDocuments(nil, bson.D{})
+	return int(total)
+}

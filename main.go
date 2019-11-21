@@ -4,7 +4,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	recover2 "github.com/kataras/iris/middleware/recover"
-	api2 "main/api"
+	"main/api"
 	"net/http"
 	"strings"
 )
@@ -56,10 +56,12 @@ func indexHtml() {
 }
 
 func apiParty() {
-	api := app.Party("/api")
-	api.Handle("GET", "/img", api2.ApiGetImgList)
-	api.Post("/upload/img", api2.ApiUploadImg)
-	api.Post("/upload/multiImg", api2.ApiUploadMultiImg)
+	apiGroup := app.Party("/api")
+	apiGroup.Handle("GET", "/img", api.ApiGetImgList)
+	apiGroup.Post("/upload/img", api.ApiUploadImg)
+	apiGroup.Post("/upload/multiImg", api.ApiUploadMultiImg)
+	apiGroup.Post("/register", api.RegisterAccount)
+	apiGroup.Post("/login", api.AccountLogin)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/

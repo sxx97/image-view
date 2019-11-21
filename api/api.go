@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"github.com/kataras/iris"
-	"main/uploadImg"
 	"mime/multipart"
 	"os"
 	"strconv"
@@ -11,13 +10,17 @@ import (
 
 var multiUploadImgList []string
 
+func init() {
+	initUploadCollections()
+}
+
 // 获取图片列表
 func ApiGetImgList(ctx iris.Context) {
 	fmt.Println("获取图片列表");
 	ctx.ContentType("application/json")
 	pageIndex, _ := strconv.ParseInt(ctx.FormValue("page_index"), 10, 64)
 	pageSize, _ := strconv.ParseInt(ctx.FormValue("page_size"), 10, 64)
-	imgList := uploadImg.FindImgForDatabase(pageIndex, pageSize)
+	imgList := FindImgForDatabase(pageIndex, pageSize)
 	if len(imgList) > 0 {
 		ctx.JSON(map[string]interface{}{
 			"status": "success",
@@ -36,7 +39,7 @@ func ApiGetImgList(ctx iris.Context) {
 // 上传多图片接口
 func ApiUploadMultiImg(ctx iris.Context) {
 	fmt.Println("上传接口调用");
-	var imgList []uploadImg.Image
+	var imgList []Image
 	_, err := ctx.UploadFormFiles("./upload_img", func(c iris.Context, file *multipart.FileHeader) {
 		multiUploadImgList = append(multiUploadImgList, file.Filename)
 	})
@@ -45,7 +48,7 @@ func ApiUploadMultiImg(ctx iris.Context) {
 	}
 	for _, fileName := range multiUploadImgList {
 		filePath := "./upload_img/"+fileName
-		imgList = append(imgList, uploadImg.UploadImg(filePath))
+		imgList = append(imgList, UploadImg(filePath))
 		removeErr := os.Remove(filePath)
 		if removeErr != nil {
 			fmt.Println(fileName, "删除失败,错误:", removeErr)
@@ -73,6 +76,6 @@ func ApiUploadImg(ctx iris.Context) {
 		return
 	}
 	defer file.Close()
-	uploadRes := uploadImg.UploadFileStream(file, handler.Filename, ctx.FormValue("alt"))
+	uploadRes := UploadFileStream(file, handler.Filename, ctx.FormValue("alt"))
 	ctx.JSON(uploadRes)
 }
