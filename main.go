@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/middleware/logger"
 	recover2 "github.com/kataras/iris/middleware/recover"
 	"main/api"
+	"main/goMail"
 	"net/http"
 	"strings"
 )
@@ -34,10 +35,6 @@ func initServe() {
 		fileServer(ctx)
 		app.ContextPool.Release(ctx)
 	})
-	/*
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("/webapp"))))
-	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("/webapp"))))
-	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("/webapp"))))*/
 	app.Use(recover2.New())
 	app.Use(logger.New())
 }
@@ -62,6 +59,12 @@ func apiParty() {
 	apiGroup.Post("/upload/multiImg", api.ApiUploadMultiImg)
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
+	apiGroup.Get("/email", func(ctx iris.Context) {
+		goMail.SendMail(
+			[]string{"1978417547@qq.com"},
+		"tp测试发送邮件",
+			"<h1>tp测试邮件内容</h1>")
+	})
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/

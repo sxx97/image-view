@@ -12,6 +12,7 @@ import (
 type User struct {
 	Id int `bson:"id", json:"id"`
 	Account string `bson:"account",json:"account"`
+	Email string `bson:"email",json:"email"`
 	Password string `bson:"password",json:"password"`
 }
 
@@ -31,6 +32,7 @@ func AccountLogin(ctx iris.Context) {
 func RegisterAccount(ctx iris.Context) {
 	account := ctx.FormValue("account")
 	password := ctx.FormValue("password")
+	email := ctx.FormValue("email")
 	if account == "" {
 		ctx.JSON(ResponseResult{
 			"error",
@@ -65,6 +67,7 @@ func RegisterAccount(ctx iris.Context) {
 	createAccount(User{
 		Id: accountTotal+1,
 		Account: account,
+		Email: email,
 		Password: encryptedData,
 	})
 	ctx.JSON(ResponseResult{
