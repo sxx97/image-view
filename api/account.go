@@ -3,12 +3,23 @@ package api
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
 	"main/goMail"
 	"main/mongoose"
+	"time"
 )
+
+const (
+	SecretKey string = "My Secret"
+)
+
+type Token struct {
+	Token string `json:"token"`
+}
 
 type User struct {
 	Id int `bson:"id", json:"id"`
@@ -24,7 +35,35 @@ type ResponseResult struct  {
 }
 
 func AccountLogin(ctx iris.Context) {
+	account := ctx.FormValue("account")
+	password := ctx.FormValue("password")
 
+	token := jwt.New(jwt.SigningMethodHS512)
+	claims := make(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(2)).Unix()
+	claims["iat"] = time.Now().Unix()
+	token.Claims = claims
+
+	fmt.Println("未加密的token信息:===>", token)
+	tokenString, err := token.SignedString([]byte(SecretKey))
+	if err != nil {
+		fmt.Println("加密token信息错误:", err)
+	}
+	fmt.Println("加密后的token信息:===>", tokenString)
+	fmt.Println("账号信息: ", account, "  密码:", password)
+	_, _ = ctx.JSON(ResponseResult{
+		Status:  "success",
+		Message: "登录成功!",
+		Data:    tokenString,
+	})
+}
+
+func CheckJWTToken(ctx iris.Context) {
+	token := ctx.Values().Get("jwt").(*jwt.Token)
+	ctx.Writef("This is an authenticated request\n")
+	ctx.Writef("Claim content:\n")
+	//可以了解一下token的数据结构
+	ctx.Writef("%s", token.Signature)
 }
 
 // 获取验证码

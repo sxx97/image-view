@@ -1,9 +1,11 @@
 package main
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	recover2 "github.com/kataras/iris/middleware/recover"
+	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
 	"main/api"
 	"net/http"
 	"strings"
@@ -15,6 +17,13 @@ func main() {
 	initServe()
 	indexHtml()
 	apiParty()
+	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			return []byte(api.SecretKey), nil
+		},
+		SigningMethod: jwt.SigningMethodHS512,
+	})
+	app.Use(jwtHandler.Serve)
 	app.Run(iris.TLS(":443", "mycreat.pem", "mykey.key"), iris.WithConfiguration(iris.TOML("./config/main.tml")))
 }
 
@@ -59,6 +68,7 @@ func apiParty() {
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
 	apiGroup.Get("/email", api.GetEmailCode)
+	apiGroup.Get("/checkJWT", api.CheckJWTToken)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/
