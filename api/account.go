@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/iris"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
+	"main/goMail"
 	"main/mongoose"
 )
 
@@ -26,6 +27,25 @@ func AccountLogin(ctx iris.Context) {
 
 }
 
+// 获取验证码
+func GetEmailCode(ctx iris.Context) {
+	email := ctx.FormValue("email")
+	if email == "" {
+		_, _ = ctx.JSON(ResponseResult{
+			"error",
+			"请输入邮箱",
+			nil,
+		})
+	} else {
+		goMail.SendCaptchaEmail([]string{email}, "tp验证码")
+		_, _ = ctx.JSON(ResponseResult{
+			"success",
+			"验证码已发送至您的邮箱,请注意查收",
+			nil,
+		})
+	}
+}
+
 /**
 * 注册账号处理函数
 */
@@ -33,26 +53,49 @@ func RegisterAccount(ctx iris.Context) {
 	account := ctx.FormValue("account")
 	password := ctx.FormValue("password")
 	email := ctx.FormValue("email")
+	code := ctx.FormValue("code")
 	if account == "" {
-		ctx.JSON(ResponseResult{
+		_, _ = ctx.JSON(ResponseResult{
 			"error",
 			"账号不能为空",
 			nil,
 		})
 		return
 	}
-
 	if password == "" {
-		ctx.JSON(ResponseResult{
+		_, _ = ctx.JSON(ResponseResult{
 			"error",
 			"密码不能为空",
 			nil,
 		})
 		return
 	}
+	if email == "" {
+		_, _ = ctx.JSON(ResponseResult{
+			"error",
+			"邮箱不能为空",
+			nil,
+		})
+		return
+	}
+	if code == "" {
+		_, _ = ctx.JSON(ResponseResult{
+			"error",
+			"验证码不能为空",
+			nil,
+		})
+	}
+	if !goMail.CheckCaptchaCode(email, code) {
+		_, _ = ctx.JSON(ResponseResult{
+			"error",
+			"验证码不匹配,请确认",
+			nil,
+		})
+		return
+	}
 	isExists := isExistsAccount(account)
 	if isExists {
-		ctx.JSON(ResponseResult{
+		_, _ = ctx.JSON(ResponseResult{
 			"error",
 			"账号已存在",
 			nil,
@@ -70,7 +113,7 @@ func RegisterAccount(ctx iris.Context) {
 		Email: email,
 		Password: encryptedData,
 	})
-	ctx.JSON(ResponseResult{
+	_, _ = ctx.JSON(ResponseResult{
 		"success",
 		"注册成功!",
 		nil,

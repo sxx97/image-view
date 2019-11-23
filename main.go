@@ -5,7 +5,6 @@ import (
 	"github.com/kataras/iris/middleware/logger"
 	recover2 "github.com/kataras/iris/middleware/recover"
 	"main/api"
-	"main/goMail"
 	"net/http"
 	"strings"
 )
@@ -59,12 +58,7 @@ func apiParty() {
 	apiGroup.Post("/upload/multiImg", api.ApiUploadMultiImg)
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
-	apiGroup.Get("/email", func(ctx iris.Context) {
-		goMail.SendMail(
-			[]string{"1978417547@qq.com"},
-		"tp测试发送邮件",
-			"<h1>tp测试邮件内容</h1>")
-	})
+	apiGroup.Get("/email", api.GetEmailCode)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/
