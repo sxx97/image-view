@@ -19,6 +19,7 @@ require (
 	github.com/iris-contrib/middleware/jwt v0.0.0-20191111233249-6e1f5f92190e
 	github.com/json-iterator/go v1.1.7 // indirect
 	github.com/kataras/iris v11.1.1+incompatible
+	github.com/kataras/iris/v12 v12.0.1
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/mongodb/mongo-go-driver v1.1.1

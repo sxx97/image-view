@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
 	"main/goMail"
@@ -38,13 +38,13 @@ func AccountLogin(ctx iris.Context) {
 	account := ctx.FormValue("account")
 	password := ctx.FormValue("password")
 
-	token := jwt.New(jwt.SigningMethodHS512)
-	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(2)).Unix()
-	claims["iat"] = time.Now().Unix()
-	token.Claims = claims
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS512,
+		jwt.MapClaims{
+			"exp": time.Now().Add(time.Hour * time.Duration(2)).Unix(),
+			"iat": time.Now().Unix(),
+	})
 
-	fmt.Println("未加密的token信息:===>", token)
 	tokenString, err := token.SignedString([]byte(SecretKey))
 	if err != nil {
 		fmt.Println("加密token信息错误:", err)
@@ -59,7 +59,10 @@ func AccountLogin(ctx iris.Context) {
 }
 
 func CheckJWTToken(ctx iris.Context) {
-	token := ctx.Values().Get("jwt").(*jwt.Token)
+	token, isOk := ctx.Values().Get("jwt").(*jwt.Token)
+	if !isOk {
+		fmt.Println("断言失败:这不是Token, ===", ctx.Values().Get("jwt"))
+	}
 	ctx.Writef("This is an authenticated request\n")
 	ctx.Writef("Claim content:\n")
 	//可以了解一下token的数据结构

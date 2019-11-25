@@ -2,13 +2,13 @@ package main
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/kataras/iris"
-	"github.com/kataras/iris/middleware/logger"
-	recover2 "github.com/kataras/iris/middleware/recover"
 	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/logger"
+	recover2 "github.com/kataras/iris/v12/middleware/recover"
 	"main/api"
-	"net/http"
-	"strings"
+	/*"net/http"
+	"strings"*/
 )
 
 var app *iris.Application
@@ -17,32 +17,17 @@ func main() {
 	initServe()
 	indexHtml()
 	apiParty()
-	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
-		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte(api.SecretKey), nil
-		},
-		SigningMethod: jwt.SigningMethodHS512,
-	})
-	app.Use(jwtHandler.Serve)
 	app.Run(iris.TLS(":443", "mycreat.pem", "mykey.key"), iris.WithConfiguration(iris.TOML("./config/main.tml")))
 }
 
 func initServe() {
 	app = iris.New()
 	app.Logger().SetLevel("debug")
-	fileServer := app.StaticHandler("./webapp", false, false)
-
-	app.WrapRouter(func(w http.ResponseWriter, r *http.Request, router http.HandlerFunc) {
-		path := r.URL.Path
-		app.Logger().Print("请求连接:", path)
-		if !strings.Contains(path, ".") {
-			router(w, r)
-			return
-		}
-		ctx := app.ContextPool.Acquire(w, r)
-		fileServer(ctx)
-		app.ContextPool.Release(ctx)
-	})
+	app.HandleDir("/css", "./webapp/css")
+	app.HandleDir("/js", "./webapp/js")
+	app.HandleDir("/img", "./webapp/img")
+	/*app.HandleDir("/root.txt", "./webapp")
+	app.HandleDir("/jd_root.txt", "./webapp")*/
 	app.Use(recover2.New())
 	app.Use(logger.New())
 }
@@ -61,14 +46,20 @@ func indexHtml() {
 }
 
 func apiParty() {
+	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			return []byte(api.SecretKey), nil
+		},
+		SigningMethod: jwt.SigningMethodHS512,
+	})
 	apiGroup := app.Party("/api")
-	apiGroup.Handle("GET", "/img", api.ApiGetImgList)
+	apiGroup.Get("/img", api.ApiGetImgList)
 	apiGroup.Post("/upload/img", api.ApiUploadImg)
 	apiGroup.Post("/upload/multiImg", api.ApiUploadMultiImg)
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
 	apiGroup.Get("/email", api.GetEmailCode)
-	apiGroup.Get("/checkJWT", api.CheckJWTToken)
+	apiGroup.Get("/checkJWT", api.CheckJWTToken, jwtHandler.Serve)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/

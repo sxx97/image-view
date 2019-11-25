@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 	"mime/multipart"
 	"os"
 	"strconv"
