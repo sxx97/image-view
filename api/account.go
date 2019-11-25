@@ -34,13 +34,24 @@ type ResponseResult struct  {
 	Data interface{} `json:"data"`
 }
 
+// 账号登录接口
 func AccountLogin(ctx iris.Context) {
 	account := ctx.FormValue("account")
 	password := ctx.FormValue("password")
-
+	userCollections := mongoose.NewMgo("tongpao", "users")
+	accountList := userCollections.FindDatabase(bson.D{{"account", account}, {"password", EncryptAccount(password)}}, options.Find())
+	if len(accountList) == 0 {
+		_, _ = ctx.JSON(ResponseResult{
+			"error",
+			"账号或密码错误",
+			nil,
+		})
+		return
+	}
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS512,
 		jwt.MapClaims{
+			"id": accountList[0]["id"],
 			"exp": time.Now().Add(time.Hour * time.Duration(2)).Unix(),
 			"iat": time.Now().Unix(),
 	})
@@ -49,8 +60,6 @@ func AccountLogin(ctx iris.Context) {
 	if err != nil {
 		fmt.Println("加密token信息错误:", err)
 	}
-	fmt.Println("加密后的token信息:===>", tokenString)
-	fmt.Println("账号信息: ", account, "  密码:", password)
 	_, _ = ctx.JSON(ResponseResult{
 		Status:  "success",
 		Message: "登录成功!",
@@ -58,15 +67,23 @@ func AccountLogin(ctx iris.Context) {
 	})
 }
 
+// 检验token是否正确
 func CheckJWTToken(ctx iris.Context) {
 	token, isOk := ctx.Values().Get("jwt").(*jwt.Token)
 	if !isOk {
 		fmt.Println("断言失败:这不是Token, ===", ctx.Values().Get("jwt"))
 	}
-	ctx.Writef("This is an authenticated request\n")
-	ctx.Writef("Claim content:\n")
+	//userId = token.Claims.(jwt.MapClaims)["id"]
+	ctx.Writef("经过身份验证的请求\n")
+	ctx.Writef("Header:%v\n", token.Header)
+	ctx.Writef("Raw:%v\n", token.Raw)
+	ctx.Writef("Valid:%v\n", token.Valid)
+
+	ctx.Writef("claims:%v\n", token.Claims)
+	ctx.Writef("id%v\n", token.Claims.(jwt.MapClaims)["id"])
+	ctx.Writef("Method:%v\n", token.Method)
 	//可以了解一下token的数据结构
-	ctx.Writef("%s", token.Signature)
+	ctx.Writef("Signature:%v\n", token.Signature)
 }
 
 // 获取验证码
@@ -88,9 +105,17 @@ func GetEmailCode(ctx iris.Context) {
 	}
 }
 
-/**
-* 注册账号处理函数
-*/
+// 加密账号
+func EncryptAccount(password string) (encryptedData string) {
+	md5Ctx := md5.New()
+	md5Ctx.Write([]byte(password + "tp"))
+	cipherStr := md5Ctx.Sum(nil)
+	encryptedData = hex.EncodeToString(cipherStr)
+	return
+}
+
+
+// 注册处理函数
 func RegisterAccount(ctx iris.Context) {
 	account := ctx.FormValue("account")
 	password := ctx.FormValue("password")
@@ -145,15 +170,11 @@ func RegisterAccount(ctx iris.Context) {
 		return
 	}
 	accountTotal := getAccountTotal()
-	md5Ctx := md5.New()
-	md5Ctx.Write([]byte(password + "tp"))
-	cipherStr := md5Ctx.Sum(nil)
-	encryptedData := hex.EncodeToString(cipherStr)
 	createAccount(User{
 		Id: accountTotal+1,
 		Account: account,
 		Email: email,
-		Password: encryptedData,
+		Password: EncryptAccount(password),
 	})
 	_, _ = ctx.JSON(ResponseResult{
 		"success",

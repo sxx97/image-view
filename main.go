@@ -59,7 +59,7 @@ func apiParty() {
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
 	apiGroup.Get("/email", api.GetEmailCode)
-	apiGroup.Get("/checkJWT", api.CheckJWTToken, jwtHandler.Serve)
+	apiGroup.Get("/checkJWT", jwtHandler.Serve, api.CheckJWTToken)
 	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
 		ctx.ServeFile("./root.txt", false)
 	})*/
