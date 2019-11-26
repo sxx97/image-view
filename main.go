@@ -5,13 +5,17 @@ import (
 	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/logger"
+	"github.com/kataras/iris/v12/context"
 	recover2 "github.com/kataras/iris/v12/middleware/recover"
 	"main/api"
 	/*"net/http"
 	"strings"*/
 )
 
-var app *iris.Application
+var (
+	app *iris.Application
+	NO_CHECK_PATH []string = []string{"/api/upload/img", "/api/upload/multiImg"}
+)
 
 func main() {
 	initServe()
@@ -46,21 +50,32 @@ func indexHtml() {
 }
 
 func apiParty() {
+	// jwt验证
 	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			return []byte(api.SecretKey), nil
 		},
 		SigningMethod: jwt.SigningMethodHS512,
+		ErrorHandler: func(ctx context.Context, err error) {
+			// 不验证部分不需要登录状态的代码
+			for _, path := range NO_CHECK_PATH {
+				if ctx.Path() == path {
+					ctx.Next()
+					return
+				}
+			}
+			_, _ = ctx.JSON(api.ResponseResult{
+				Status:  "error",
+				Message: "验证失败,请重新登录",
+				Data:    nil,
+			})
+		},
 	})
 	apiGroup := app.Party("/api")
 	apiGroup.Get("/img", api.ApiGetImgList)
-	apiGroup.Post("/upload/img", api.ApiUploadImg)
+	apiGroup.Post("/upload/img", jwtHandler.Serve, api.ApiUploadImg)
 	apiGroup.Post("/upload/multiImg", api.ApiUploadMultiImg)
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
 	apiGroup.Get("/email", api.GetEmailCode)
-	apiGroup.Get("/checkJWT", jwtHandler.Serve, api.CheckJWTToken)
-	/*api.Handle("GET", "/root.txt", func(ctx iris.Context) {
-		ctx.ServeFile("./root.txt", false)
-	})*/
 }

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	SecretKey string = "My Secret"
+	SecretKey string = "Tong_pao Secret Key"
 )
 
 type Token struct {
@@ -39,11 +39,20 @@ func AccountLogin(ctx iris.Context) {
 	account := ctx.FormValue("account")
 	password := ctx.FormValue("password")
 	userCollections := mongoose.NewMgo("tongpao", "users")
-	accountList := userCollections.FindDatabase(bson.D{{"account", account}, {"password", EncryptAccount(password)}}, options.Find())
+	accountList := userCollections.FindDatabase(bson.D{{"account", account}}, options.Find())
 	if len(accountList) == 0 {
 		_, _ = ctx.JSON(ResponseResult{
 			"error",
-			"账号或密码错误",
+			"账号不存在,请检查",
+			nil,
+		})
+		return
+	}
+	accountList = userCollections.FindDatabase(bson.D{{"account", account}, {"password", EncryptAccount(password)}}, options.Find())
+	if len(accountList) == 0 {
+		_, _ = ctx.JSON(ResponseResult{
+			"error",
+			"密码错误",
 			nil,
 		})
 		return
@@ -67,23 +76,15 @@ func AccountLogin(ctx iris.Context) {
 	})
 }
 
-// 检验token是否正确
-func CheckJWTToken(ctx iris.Context) {
+// jwtToken解析
+func JWTParse(ctx iris.Context) (userId int) {
 	token, isOk := ctx.Values().Get("jwt").(*jwt.Token)
 	if !isOk {
 		fmt.Println("断言失败:这不是Token, ===", ctx.Values().Get("jwt"))
+		return
 	}
-	//userId = token.Claims.(jwt.MapClaims)["id"]
-	ctx.Writef("经过身份验证的请求\n")
-	ctx.Writef("Header:%v\n", token.Header)
-	ctx.Writef("Raw:%v\n", token.Raw)
-	ctx.Writef("Valid:%v\n", token.Valid)
-
-	ctx.Writef("claims:%v\n", token.Claims)
-	ctx.Writef("id%v\n", token.Claims.(jwt.MapClaims)["id"])
-	ctx.Writef("Method:%v\n", token.Method)
-	//可以了解一下token的数据结构
-	ctx.Writef("Signature:%v\n", token.Signature)
+	userId = token.Claims.(jwt.MapClaims)["id"].(int)
+	return
 }
 
 // 获取验证码
@@ -183,17 +184,13 @@ func RegisterAccount(ctx iris.Context) {
 	})
 }
 
-/**
-* 创建账号(操作数据库)
-*/
+// 创建账号
 func createAccount(account User) {
 	userCollections := mongoose.NewMgo("tongpao", "users")
 	userCollections.InsertDatabase(account)
 }
 
-/**
-* 查询账号是否已经存在
-*/
+// 查询账号是否已经存在
 func isExistsAccount(account string) bool {
 	userCollections := mongoose.NewMgo("tongpao", "users")
 	finResultArr := userCollections.FindDatabase(bson.D{{"account", account}}, options.Find())
@@ -201,9 +198,7 @@ func isExistsAccount(account string) bool {
 }
 
 
-/**
-* 获取账号总数
-*/
+// 获取账号总数
 func getAccountTotal() (accountTotal int){
 	userCollections := mongoose.NewMgo("tongpao", "users")
 	return userCollections.FindDatabaseTotal()
