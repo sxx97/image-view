@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris/v12"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"main/goMail"
 	"main/mongoose"
 	"time"
@@ -16,23 +16,6 @@ import (
 const (
 	SecretKey string = "Tong_pao Secret Key"
 )
-
-type Token struct {
-	Token string `json:"token"`
-}
-
-type User struct {
-	Id int `bson:"id", json:"id"`
-	Account string `bson:"account",json:"account"`
-	Email string `bson:"email",json:"email"`
-	Password string `bson:"password",json:"password"`
-}
-
-type ResponseResult struct  {
-	Status string `json:"status"`
-	Message string `json:"message"`
-	Data interface{} `json:"data"`
-}
 
 // 账号登录接口
 func AccountLogin(ctx iris.Context) {
@@ -83,7 +66,13 @@ func JWTParse(ctx iris.Context) (userId int) {
 		fmt.Println("断言失败:这不是Token, ===", ctx.Values().Get("jwt"))
 		return
 	}
-	userId = token.Claims.(jwt.MapClaims)["id"].(int)
+
+	var convertErr bool
+	userId, convertErr = token.Claims.(jwt.MapClaims)["id"].(int)
+	if !convertErr {
+		floatUserId := token.Claims.(jwt.MapClaims)["id"].(float64)
+		userId = int(floatUserId)
+	}
 	return
 }
 

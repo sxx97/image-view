@@ -66,7 +66,7 @@ func apiParty() {
 			}
 			_, _ = ctx.JSON(api.ResponseResult{
 				Status:  "error",
-				Message: "验证失败,请重新登录",
+				Message: "请登录后再操作",
 				Data:    nil,
 			})
 		},
@@ -74,8 +74,9 @@ func apiParty() {
 	apiGroup := app.Party("/api")
 	apiGroup.Get("/img", api.ApiGetImgList)
 	apiGroup.Post("/upload/img", jwtHandler.Serve, api.ApiUploadImg)
-	apiGroup.Post("/upload/multiImg", api.ApiUploadMultiImg)
+	apiGroup.Post("/upload/multiImg", jwtHandler.Serve, api.ApiUploadMultiImg)
 	apiGroup.Post("/register", api.RegisterAccount)
 	apiGroup.Post("/login", api.AccountLogin)
 	apiGroup.Get("/email", api.GetEmailCode)
+	apiGroup.Post("/feedback", jwtHandler.Serve, api.FeedBackAdvise)
 }

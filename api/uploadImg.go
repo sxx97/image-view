@@ -15,12 +15,7 @@ var (
 	ossBucket *oss.Bucket
 )
 
-type Image struct {
-	ID  interface{} `json:"id",bson:"id",_id,omitempty`         // 简写bson映射口
-	Alt string        `json:"alt",bson:"alt"` // bson和json映射
-	Src string        `json:"src",bson:"src"`// 属性名 为全小写的key
-	FullSrc string  `json:"fullSrc",bson:"fullSrc"`
-}
+
 
 
 func initUploadCollections() {
@@ -55,8 +50,9 @@ type ImgResultData struct {
 
 // 上传文件(文件名称)
 // localFileName 本地文件名称
+// userId 上传图片用户的id
 // 用于服务器上传
-func UploadImg(localFileName string) (resultData Image) {
+func UploadImg(localFileName string, userId int) (resultData Image) {
 	var (
 		visitImgUrl string
 	)
@@ -76,6 +72,7 @@ func UploadImg(localFileName string) (resultData Image) {
 		Alt: "",
 		FullSrc: visitImgUrl,
 		Src: objectName,
+		UserId: userId,
 	})
 	if insertResult != nil {
 		resultData = Image{
@@ -88,10 +85,11 @@ func UploadImg(localFileName string) (resultData Image) {
 
 //	上传文件(流形式)
 //	fd 文件流
+//  userId 上传的用户的id
 //	fileName 文件名称
 //  alt 图片介绍
 // 用于客户端上传
-func UploadFileStream(fd io.Reader, fileName string, alt ...string) ImgResultData {
+func UploadFileStream(fd io.Reader, fileName string, userId int, alt ...string) ImgResultData {
 	var (
 		visitImgUrl string
 		resultData  ImgResultData
@@ -116,6 +114,7 @@ func UploadFileStream(fd io.Reader, fileName string, alt ...string) ImgResultDat
 		Alt: alt[0],
 		Src: fileName,
 		FullSrc: visitImgUrl,
+		UserId: userId,
 	})
 	if insertResult != nil {
 		resultData = ImgResultData{
