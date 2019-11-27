@@ -13,7 +13,7 @@ type User struct {
 }
 
 type Image struct {
-	ID  interface{} `json:"id",bson:"id",_id,omitempty`         // 简写bson映射口
+	ID  interface{} `id,omitempty`         // 简写bson映射口
 	Alt string        `json:"alt",bson:"alt"` // bson和json映射
 	Src string        `json:"src",bson:"src"`// 属性名 为全小写的key
 	FullSrc string  `json:"fullSrc",bson:"fullSrc"`

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var captchaMap map[string]string = make(map[string]string)
+var captchaMap  = make(map[string]string)
 
 
 
@@ -31,7 +31,7 @@ func GenValidateCode(width int) string {
 func SendCaptchaEmail(mailTo []string, subject string) {
 	for _, emailAddress := range mailTo {
 		captchaMap[emailAddress] = GenValidateCode(6)
-		SendMail([]string{emailAddress}, subject, "<p>验证码: <b style='color: #ff6161;font-size: 20px;'>"+captchaMap[emailAddress]+"</b></p>")
+		_ = SendMail([]string{emailAddress}, subject, "<p>验证码: <b style='color: #ff6161;font-size: 20px;'>"+captchaMap[emailAddress]+"</b></p>")
 		go deleteCaptcha(emailAddress)
 	}
 }

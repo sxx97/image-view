@@ -1,15 +1,13 @@
 package main
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/middleware/logger"
-	"github.com/kataras/iris/v12/context"
-	recover2 "github.com/kataras/iris/v12/middleware/recover"
 	"main/api"
-	/*"net/http"
-	"strings"*/
+	"github.com/dgrijalva/jwt-go"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/v12/middleware/logger"
+	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
+	recover2 "github.com/kataras/iris/v12/middleware/recover"
 )
 
 var (
@@ -21,7 +19,7 @@ func main() {
 	initServe()
 	indexHtml()
 	apiParty()
-	app.Run(iris.TLS(":443", "mycreat.pem", "mykey.key"), iris.WithConfiguration(iris.TOML("./config/main.tml")))
+	_ = app.Run(iris.TLS(":443", "mycreat.pem", "mykey.key"), iris.WithConfiguration(iris.TOML("./config/main.tml")))
 }
 
 func initServe() {
@@ -39,11 +37,11 @@ func initServe() {
 func indexHtml() {
 	app.RegisterView(iris.HTML("./webapp", ".html"))
 	app.Get("/", func(ctx iris.Context) {
-		ctx.View("index.html")
+		_ = ctx.View("index.html")
 	})
 	app.Get("/:page", func(ctx iris.Context) {
 		if ctx.Path() != "/api" {
-			ctx.View("index.html")
+			_ = ctx.View("index.html")
 		}
 	})
 
@@ -57,7 +55,7 @@ func apiParty() {
 		},
 		SigningMethod: jwt.SigningMethodHS512,
 		ErrorHandler: func(ctx context.Context, err error) {
-			// 不验证部分不需要登录状态的代码
+			// 略过不需要验证的接口
 			for _, path := range NO_CHECK_PATH {
 				if ctx.Path() == path {
 					ctx.Next()

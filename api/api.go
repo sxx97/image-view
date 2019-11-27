@@ -90,7 +90,7 @@ func ApiUploadMultiImg(ctx iris.Context) {
 			imgList,
 		})
 	} else {
-		_, _ =ctx.JSON(ResponseResult{"上传失败,请重新上传", "error", nil})
+		_, _ = ctx.JSON(ResponseResult{"上传失败,请重新上传", "error", nil})
 	}
 	return
 }
@@ -102,10 +102,10 @@ func ApiUploadImg(ctx iris.Context) {
 	file, handler, err := ctx.FormFile("uploadFile")
 	if err != nil {
 		fmt.Println("上传文件错误:", err)
-		ctx.JSON(map[string]string{"message": "请选择文件再上传", "status": "error"})
+		_, _ = ctx.JSON(map[string]string{"message": "请选择文件再上传", "status": "error"})
 		return
 	}
 	defer file.Close()
 	uploadRes := UploadFileStream(file, handler.Filename, userId, ctx.FormValue("alt"))
-	ctx.JSON(uploadRes)
+	_, _ = ctx.JSON(uploadRes)
 }
