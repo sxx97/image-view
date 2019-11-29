@@ -27,7 +27,7 @@ func FeedBackAdvise(ctx iris.Context) {
 		})
 		return
 	}
-	feedBackNoteCollections := mongoose.NewMgo("test", "feedbackNote")
+	feedBackNoteCollections := mongoose.NewMgo("tongpao", "feedbackNote")
 	feedBackNoteCollections.InsertDatabase(FeedbackNote{
 		Note: note,
 		UserId: userId,
