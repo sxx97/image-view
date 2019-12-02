@@ -36,15 +36,15 @@ func initServe() {
 
 func indexHtml() {
 	app.RegisterView(iris.HTML("./webapp", ".html"))
-	api.StaticIndexPage()
-	/*app.Get("/", func(ctx iris.Context) {
+	//api.StaticIndexPage()
+	app.Get("/", func(ctx iris.Context) {
 		_ = ctx.View("index.html")
 	})
 	app.Get("/:page", func(ctx iris.Context) {
 		if ctx.Path() != "/api" {
 			_ = ctx.View("index.html")
 		}
-	})*/
+	})
 }
 
 func apiParty() {
