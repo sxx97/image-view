@@ -42,7 +42,7 @@ func initUploadCollections() {
 //
 //
 func StaticIndexPage() {
-	err := ossClient.SetBucketWebsite(bucketName, "index.html", "")
+	err := ossClient.SetBucketWebsite(bucketName, "./website/index.html", "")
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
