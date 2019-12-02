@@ -13,6 +13,8 @@ import (
 
 var (
 	ossBucket *oss.Bucket
+	ossClient *oss.Client
+	bucketName string = "tongpaotk"
 )
 
 
@@ -22,16 +24,28 @@ func initUploadCollections() {
 	endpoint := "http://oss-cn-beijing.aliyuncs.com"
 	accessKeyId := "LTAI4FhJUZB4WCLjtdcaHZiz"
 	accessKeySecret := "7abBcSN7Y7qdgBQCUsnB0D78fs6bjJ"
-	bucketName := "tongpaotk"
+
 	client, err := oss.New(endpoint, accessKeyId, accessKeySecret)
 	if err != nil {
 		handleError(err)
 	}
+	ossClient = client
 	bucket, err := client.Bucket(bucketName)
 	if err != nil {
 		handleError(err)
 	}
 	ossBucket = bucket
+}
+
+
+// 静态网站托管
+//
+//
+func StaticIndexPage() {
+	err := ossClient.SetBucketWebsite(bucketName, "index.html", "")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
 }
 
 /**
